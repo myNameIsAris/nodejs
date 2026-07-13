@@ -1,20 +1,28 @@
 const { Sequelize } = require('sequelize')
 const { DB } = require('.')
 
-const pgsql = new Sequelize(DB.NAME, DB.USER, DB.PASS, {
-  host: DB.HOST,
-  port: DB.PORT,
-  dialect: 'postgres',
-  logging: false,
-  pool: {
-    max: 10,
-    min: 0,
-    acquire: 60000,
-    idle: 10000,
-  },
-})
+const isTest = process.env.NODE_ENV === 'test'
 
-if (process.env.NODE_ENV !== 'test') {
+const pgsql = isTest
+  ? new Sequelize({
+      dialect: 'sqlite',
+      storage: ':memory:',
+      logging: false,
+    })
+  : new Sequelize(DB.NAME, DB.USER, DB.PASS, {
+      host: DB.HOST,
+      port: DB.PORT,
+      dialect: 'postgres',
+      logging: false,
+      pool: {
+        max: 10,
+        min: 0,
+        acquire: 60000,
+        idle: 10000,
+      },
+    })
+
+if (!isTest) {
   pgsql
     .authenticate()
     .then(async () => {

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "set NODE_ENV=test&& jest --coverage --detectOpenHandles",
     "start": "node src/index.js",
     "dev": "nodemon src/index.js"
   },
@@ -27,6 +27,9 @@
     "uuid": "^14.0.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "jest": "^30.4.2",
+    "nodemon": "^3.1.14",
+    "sqlite3": "^6.0.1",
+    "supertest": "^7.2.2"
   }
 }

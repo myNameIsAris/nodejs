@@ -1,6 +1,6 @@
 const { ValidationError } = require('../helper/customErrorHelper')
 const { usersModel } = require('../model/relation')
-const { registerSchema, loginSchema } = require('../validator/authValidator')
+const { registerSchema, loginSchema, refreshSchema } = require('../validator/authValidator')
 const validate = require('../validator/validator')
 const BaseService = require('./baseService')
 const { Op } = require('sequelize')
@@ -85,7 +85,7 @@ class AuthService extends BaseService {
     const { refreshToken } = this.body
 
     // Verify Token
-    const decoded = verifyToken(refreshToken)
+    const decoded = verifyToken(refreshToken, 'refresh')
     if (!decoded) {
       throw new ValidationError('Invalid token')
     }
