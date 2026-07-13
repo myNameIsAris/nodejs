@@ -7,6 +7,15 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js"
   },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/controller/**/*.js",
+      "src/service/**/*.js",
+      "src/middleware/**/*.js"
+    ]
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

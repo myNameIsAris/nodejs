@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs')
 const { usersModel } = require('../model/relation')
 const { createApp, setupDB, teardownDB, resetDB } = require('../helper/testSetup')
 const { makeRegisterBody, makeLoginBody, makeToken, makeUser } = require('../helper/testHelper')
+const AuthService = require('../service/authService')
 
 const app = createApp()
 
@@ -19,7 +20,17 @@ describe('Auth API', () => {
     await resetDB()
   })
 
-  // ── POST /api/auth/register ──────────────────────────────────────────
+  describe('AuthService', () => {
+    it('should use default values when called with no arguments', () => {
+      const svc = new AuthService()
+      expect(svc.body).toEqual({})
+      expect(svc.query).toEqual({})
+      expect(svc.params).toEqual({})
+      expect(svc.user).toEqual({})
+      expect(svc.files).toEqual([])
+    })
+  })
+
   describe('POST /api/auth/register', () => {
     it('should return 200 and success message on valid registration', async () => {
       const body = makeRegisterBody()
@@ -59,9 +70,19 @@ describe('Auth API', () => {
       expect(res.status).toBe(400)
       expect(res.body.error).toContain('Username or Email already exists')
     })
+
+    it('should return 400 with validation details on invalid email format', async () => {
+      const res = await request(app).post('/api/auth/register').send({
+        name: 'Test',
+        username: 'test',
+        email: 'not-an-email',
+        password: 'Password123',
+      })
+
+      expect(res.status).toBe(400)
+    })
   })
 
-  // ── POST /api/auth/login ─────────────────────────────────────────────
   describe('POST /api/auth/login', () => {
     it('should return 200 with tokens on valid login', async () => {
       const plainPassword = 'Password123'
@@ -97,9 +118,8 @@ describe('Auth API', () => {
     })
   })
 
-  // ── GET /api/auth/identify ───────────────────────────────────────────
   describe('GET /api/auth/identify', () => {
-    it('should return 200 with user data (no password, no version)', async () => {
+    it('should return 200 with user data', async () => {
       const user = await usersModel.create(makeUser({ name: 'Aris' }))
       const token = makeToken({ id: user.id, version: user.version }, 'access')
 
@@ -124,7 +144,6 @@ describe('Auth API', () => {
     })
   })
 
-  // ── POST /api/auth/refresh ───────────────────────────────────────────
   describe('POST /api/auth/refresh', () => {
     it('should return 200 with new token pair', async () => {
       const user = await usersModel.create(makeUser())
@@ -147,7 +166,6 @@ describe('Auth API', () => {
     })
   })
 
-  // ── POST /api/auth/logout ────────────────────────────────────────────
   describe('POST /api/auth/logout', () => {
     it('should return 200 and increment version', async () => {
       const user = await usersModel.create(makeUser({ version: 0 }))
@@ -174,6 +192,60 @@ describe('Auth API', () => {
       const res = await request(app).get('/api/auth/identify').set('Authorization', `Bearer ${token}`)
 
       expect(res.status).toBe(401)
+    })
+  })
+
+  describe('POST /api/auth/refresh', () => {
+    it('should return 400 with refresh token signed with wrong secret', async () => {
+      const fakeToken = makeToken({ id: 'some-id', version: 0 }, 'refresh', 'wrong-secret')
+      const res = await request(app).post('/api/auth/refresh').send({ refreshToken: fakeToken })
+
+      expect(res.status).toBe(400)
+    })
+  })
+
+  describe('GET /api/auth/identify', () => {
+    it('should return 401 when user no longer exists (deleted after token issued)', async () => {
+      const user = await usersModel.create(makeUser())
+      const token = makeToken({ id: user.id, version: user.version }, 'access')
+      await usersModel.destroy({ where: { id: user.id } })
+
+      const res = await request(app).get('/api/auth/identify').set('Authorization', `Bearer ${token}`)
+
+      expect(res.status).toBe(401)
+    })
+
+    it('should return 401 with malformed Authorization header', async () => {
+      const res = await request(app).get('/api/auth/identify').set('Authorization', 'InvalidFormat')
+
+      expect(res.status).toBe(401)
+    })
+  })
+
+  // ── Controller catch blocks ───────────────────────────────────────────
+  describe('Controller error handling', () => {
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    it('should return 500 when service.identify() throws', async () => {
+      const user = await usersModel.create(makeUser())
+      const token = makeToken({ id: user.id, version: user.version }, 'access')
+      jest.spyOn(AuthService.prototype, 'identify').mockRejectedValue(new Error('identify boom'))
+
+      const res = await request(app).get('/api/auth/identify').set('Authorization', `Bearer ${token}`)
+
+      expect(res.status).toBe(500)
+    })
+
+    it('should return 500 when service.logout() throws', async () => {
+      const user = await usersModel.create(makeUser())
+      const token = makeToken({ id: user.id, version: user.version }, 'access')
+      jest.spyOn(AuthService.prototype, 'logout').mockRejectedValue(new Error('logout boom'))
+
+      const res = await request(app).post('/api/auth/logout').set('Authorization', `Bearer ${token}`)
+
+      expect(res.status).toBe(500)
     })
   })
 })
