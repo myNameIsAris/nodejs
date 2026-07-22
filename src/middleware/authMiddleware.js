@@ -1,5 +1,4 @@
-const jwt = require('jsonwebtoken')
-const config = require('../config')
+const { v4: uuid } = require('uuid')
 const usersModel = require('../model/usersModel')
 const { AuthenticationError } = require('../helper/customErrorHelper')
 const { verifyToken } = require('../helper/jwtHelper')
@@ -45,4 +44,9 @@ const authMiddleware = async (req, res, next) => {
   }
 }
 
-module.exports = authMiddleware
+const stackTraceMiddleware = (req, _, next) => {
+  req.id = uuid()
+  next()
+}
+
+module.exports = { authMiddleware, stackTraceMiddleware }

@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const { JWT } = require('../config')
+const { AuthenticationError } = require('./customErrorHelper')
 
 const verifyToken = (token, type) => {
   try {
@@ -8,7 +9,8 @@ const verifyToken = (token, type) => {
     }
     return jwt.verify(token, JWT.REFRESH)
   } catch (error) {
-    return null
+    console.log(error)
+    throw new AuthenticationError('Invalid token')
   }
 }
 
