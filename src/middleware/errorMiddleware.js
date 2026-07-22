@@ -1,10 +1,11 @@
 const { response } = require('../helper/responseHelper')
+const logger = require('../helper/logger')
 
 const errorMiddleware = async (error, req, res, next) => {
   if (!error) {
     return next()
   }
-  console.log(error)
+  logger.error(error)
 
   switch (error.name) {
     case 'ValidationError':
