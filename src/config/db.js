@@ -1,7 +1,7 @@
 const { Sequelize } = require('sequelize')
-const { DB } = require('.')
+const { DB, ENV } = require('.')
 
-const isTest = process.env.NODE_ENV === 'test'
+const isTest = ENV === 'test'
 
 const pgsql = isTest
   ? new Sequelize({
