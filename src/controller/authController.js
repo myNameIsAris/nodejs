@@ -5,7 +5,7 @@ exports.register = async (req, res, next) => {
   try {
     const { name, username, email, password } = req.body
     const result = await authService.register(name, username, email, password)
-    return response(res, 200, 'Success', 'Success register user', result)
+    return response(res, 201, 'Success', 'Success register user', result)
   } catch (error) {
     next(error)
   }
@@ -30,10 +30,10 @@ exports.identify = (req, res, next) => {
   }
 }
 
-exports.refresh = (req, res, next) => {
+exports.refresh = async (req, res, next) => {
   try {
     const { refreshToken } = req.body
-    const result = authService.refresh(refreshToken)
+    const result = await authService.refresh(refreshToken)
     return response(res, 200, 'Success', 'Success refresh user', result)
   } catch (error) {
     next(error)

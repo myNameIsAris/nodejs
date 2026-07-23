@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const { Op } = require('sequelize')
+const { BCRYPT_ROUNDS } = require('../config')
 const { ValidationError } = require('../helper/customErrorHelper')
 const { createToken, verifyToken } = require('../helper/jwtHelper')
 const { usersModel } = require('../model/relation')
@@ -27,7 +28,7 @@ class AuthService {
       name,
       username,
       email,
-      password: await bcrypt.hash(password, 10),
+      password: await bcrypt.hash(password, BCRYPT_ROUNDS),
     })
 
     return true
@@ -42,15 +43,16 @@ class AuthService {
       where: {
         [Op.or]: [{ username: email }, { email }],
       },
+      attributes: ['id', 'version', 'password'],
     })
     if (!user) {
-      throw new ValidationError('Username or Email not found')
+      throw new ValidationError('Invalid credentials')
     }
 
     // Check Password
     const isPasswordCorrect = await bcrypt.compare(password, user.password)
     if (!isPasswordCorrect) {
-      throw new ValidationError('Password incorrect')
+      throw new ValidationError('Invalid credentials')
     }
 
     // Generate Token
@@ -61,11 +63,11 @@ class AuthService {
   }
 
   identify(user) {
-    delete user.version
-    return user
+    const { version, ...safe } = user
+    return safe
   }
 
-  refresh(refreshToken) {
+  async refresh(refreshToken) {
     // Validate Request
     validate(refreshSchema, { refreshToken })
 
@@ -77,9 +79,18 @@ class AuthService {
       throw new ValidationError('Invalid token')
     }
 
+    // Check token not revoked (version must match current user version)
+    const user = await usersModel.findByPk(decoded.id, {
+      attributes: ['id', 'version'],
+      raw: true,
+    })
+    if (!user || user.version !== decoded.version) {
+      throw new ValidationError('Invalid token')
+    }
+
     // Generate Token
-    const newAccessToken = createToken({ id: decoded.id, version: decoded.version }, 'access')
-    const newRefreshToken = createToken({ id: decoded.id, version: decoded.version }, 'refresh')
+    const newAccessToken = createToken({ id: user.id, version: user.version }, 'access')
+    const newRefreshToken = createToken({ id: user.id, version: user.version }, 'refresh')
 
     return { accessToken: newAccessToken, refreshToken: newRefreshToken }
   }

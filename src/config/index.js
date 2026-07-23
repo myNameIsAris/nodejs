@@ -14,4 +14,5 @@ module.exports = {
     SECRET: process.env.JWT_SECRET,
     REFRESH: process.env.JWT_REFRESH_SECRET,
   },
+  BCRYPT_ROUNDS: Number(process.env.BCRYPT_ROUNDS) || 10,
 }
