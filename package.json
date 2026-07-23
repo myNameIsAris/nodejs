@@ -17,7 +17,9 @@
       "src/service/**/*.js",
       "src/middleware/**/*.js"
     ],
-    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"]
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ]
   },
   "keywords": [],
   "author": "",
@@ -28,12 +30,14 @@
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
+    "exceljs": "^4.4.0",
     "express": "^5.2.1",
     "express-fileupload": "^1.5.2",
     "joi": "^18.2.3",
     "jsonwebtoken": "^9.0.3",
     "moment-timezone": "^0.6.2",
     "nodemailer": "^9.0.3",
+    "pdfkit": "^0.15.0",
     "pg": "^8.22.0",
     "sequelize": "^6.37.8",
     "uuid": "^14.0.1",

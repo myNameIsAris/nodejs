@@ -57,7 +57,7 @@ module.exports = [
       'no-console': 'off',
       // Unused imports handling
       'unused-imports/no-unused-imports': 'error',
-      'unused-imports/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      'unused-imports/no-unused-vars': ['warn', { argsIgnorePattern: '^_', ignoreRestSiblings: true, caughtErrors: 'none' }],
       // Must-have built-in rules
       'eqeqeq': ['error', 'always'],
       'no-var': 'error',

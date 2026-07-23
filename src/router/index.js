@@ -2,8 +2,10 @@ const express = require('express')
 const router = express.Router()
 
 const authRoutes = require('./authRoutes')
+const userRoutes = require('./userRoutes')
 
 router.use('/auth', authRoutes)
+router.use('/users', userRoutes)
 router.get('/ping', (req, res) => {
   return res.send('Pong')
 })

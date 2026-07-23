@@ -21,13 +21,13 @@ describe('Auth API', () => {
   })
 
   describe('POST /api/auth/register', () => {
-    it('should return 200 and success message on valid registration', async () => {
+    it('should return 201 and success message on valid registration', async () => {
       const body = makeRegisterBody()
 
       const res = await request(app).post('/api/auth/register').send(body)
 
-      expect(res.status).toBe(200)
-      expect(res.body.httpCode).toBe(200)
+      expect(res.status).toBe(201)
+      expect(res.body.httpCode).toBe(201)
       expect(res.body.message).toBe('Success register user')
       expect(res.body.data).toBe(true)
 
@@ -93,7 +93,7 @@ describe('Auth API', () => {
       const res = await request(app).post('/api/auth/login').send(body)
 
       expect(res.status).toBe(400)
-      expect(res.body.error.message).toContain('Username or Email not found')
+      expect(res.body.error.message).toContain('Invalid credentials')
     })
 
     it('should return 400 when password is incorrect', async () => {
@@ -103,7 +103,7 @@ describe('Auth API', () => {
       const res = await request(app).post('/api/auth/login').send(body)
 
       expect(res.status).toBe(400)
-      expect(res.body.error.message).toContain('Password incorrect')
+      expect(res.body.error.message).toContain('Invalid credentials')
     })
   })
 
