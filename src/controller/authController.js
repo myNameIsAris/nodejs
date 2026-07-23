@@ -1,56 +1,50 @@
 const { response } = require('../helper/responseHelper')
 const authService = require('../service/authService')
 
-class AuthController {
-  async register(req, res, next) {
-    try {
-      const service = new authService(req.body, req.query, req.params, req.user, req.files)
-      const result = await service.register()
-      return response(res, 200, 'Success', 'Success register user', result)
-    } catch (error) {
-      next(error)
-    }
-  }
-
-  async login(req, res, next) {
-    try {
-      const service = new authService(req.body, req.query, req.params, req.user, req.files)
-      const result = await service.login()
-      return response(res, 200, 'Success', 'Success login user', result)
-    } catch (error) {
-      next(error)
-    }
-  }
-
-  async identify(req, res, next) {
-    try {
-      const service = new authService(req.body, req.query, req.params, req.user, req.files)
-      const result = await service.identify()
-      return response(res, 200, 'Success', 'Success identify user', result)
-    } catch (error) {
-      next(error)
-    }
-  }
-
-  async refresh(req, res, next) {
-    try {
-      const service = new authService(req.body, req.query, req.params, req.user, req.files)
-      const result = await service.refresh()
-      return response(res, 200, 'Success', 'Success refresh user', result)
-    } catch (error) {
-      next(error)
-    }
-  }
-
-  async logout(req, res, next) {
-    try {
-      const service = new authService(req.body, req.query, req.params, req.user, req.files)
-      const result = await service.logout()
-      return response(res, 200, 'Success', 'Success logout user', result)
-    } catch (error) {
-      next(error)
-    }
+exports.register = async (req, res, next) => {
+  try {
+    const { name, username, email, password } = req.body
+    const result = await authService.register(name, username, email, password)
+    return response(res, 200, 'Success', 'Success register user', result)
+  } catch (error) {
+    next(error)
   }
 }
 
-module.exports = new AuthController()
+exports.login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body
+    const result = await authService.login(email, password)
+    return response(res, 200, 'Success', 'Success login user', result)
+  } catch (error) {
+    next(error)
+  }
+}
+
+exports.identify = (req, res, next) => {
+  try {
+    const result = authService.identify(req.user)
+    return response(res, 200, 'Success', 'Success identify user', result)
+  } catch (error) {
+    next(error)
+  }
+}
+
+exports.refresh = (req, res, next) => {
+  try {
+    const { refreshToken } = req.body
+    const result = authService.refresh(refreshToken)
+    return response(res, 200, 'Success', 'Success refresh user', result)
+  } catch (error) {
+    next(error)
+  }
+}
+
+exports.logout = async (req, res, next) => {
+  try {
+    const result = await authService.logout(req.user.id, req.user.version)
+    return response(res, 200, 'Success', 'Success logout user', result)
+  } catch (error) {
+    next(error)
+  }
+}

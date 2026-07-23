@@ -1,25 +1,17 @@
 const bcrypt = require('bcryptjs')
 const { Op } = require('sequelize')
-const BaseService = require('./baseService')
 const { ValidationError } = require('../helper/customErrorHelper')
 const { createToken, verifyToken } = require('../helper/jwtHelper')
 const { usersModel } = require('../model/relation')
 const { registerSchema, loginSchema, refreshSchema } = require('../validator/authValidator')
 const validate = require('../validator/validator')
 
-class AuthService extends BaseService {
-  constructor(body = {}, query = {}, params = {}, user = {}, files = []) {
-    super(body, query, params, user, files)
-  }
-
-  async register() {
+class AuthService {
+  async register(name, username, email, password) {
     // Validate Request
-    validate(registerSchema, this.body)
+    validate(registerSchema, { name, username, email, password })
 
-    // Get Request
-    const { name, username, email, password } = this.body
-
-    // Validation
+    // Check existing user
     const findUser = await usersModel.findOne({
       where: {
         [Op.or]: [{ username }, { email }],
@@ -41,12 +33,9 @@ class AuthService extends BaseService {
     return true
   }
 
-  async login() {
+  async login(email, password) {
     // Validate Request
-    validate(loginSchema, this.body)
-
-    // Get Request
-    const { email, password } = this.body
+    validate(loginSchema, { email, password })
 
     // Find User
     const user = await usersModel.findOne({
@@ -71,17 +60,14 @@ class AuthService extends BaseService {
     return { accessToken, refreshToken }
   }
 
-  identify() {
-    delete this.user.version
-    return this.user
+  identify(user) {
+    delete user.version
+    return user
   }
 
-  refresh() {
+  refresh(refreshToken) {
     // Validate Request
-    validate(refreshSchema, this.body)
-
-    // Get Request
-    const { refreshToken } = this.body
+    validate(refreshSchema, { refreshToken })
 
     // Verify Token
     const decoded = verifyToken(refreshToken, 'refresh')
@@ -96,15 +82,15 @@ class AuthService extends BaseService {
     return { accessToken: newAccessToken, refreshToken: newRefreshToken }
   }
 
-  async logout() {
+  async logout(userId, userVersion) {
     // Update User Version
     await usersModel.update(
       {
-        version: this.user.version + 1,
+        version: userVersion + 1,
       },
       {
         where: {
-          id: this.user.id,
+          id: userId,
         },
       }
     )
@@ -113,4 +99,4 @@ class AuthService extends BaseService {
   }
 }
 
-module.exports = AuthService
+module.exports = new AuthService()
