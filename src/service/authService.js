@@ -70,8 +70,10 @@ class AuthService {
     validate(refreshSchema, { refreshToken })
 
     // Verify Token
-    const decoded = verifyToken(refreshToken, 'refresh')
-    if (!decoded) {
+    let decoded
+    try {
+      decoded = verifyToken(refreshToken, 'refresh')
+    } catch (error) {
       throw new ValidationError('Invalid token')
     }
 

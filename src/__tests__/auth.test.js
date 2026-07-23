@@ -3,7 +3,7 @@ const request = require('supertest')
 const { makeRegisterBody, makeLoginBody, makeToken, makeUser } = require('../helper/testHelper')
 const { createApp, setupDB, teardownDB, resetDB } = require('../helper/testSetup')
 const { usersModel } = require('../model/relation')
-const AuthService = require('../service/authService')
+const authService = require('../service/authService')
 
 const app = createApp()
 
@@ -18,17 +18,6 @@ describe('Auth API', () => {
 
   afterEach(async () => {
     await resetDB()
-  })
-
-  describe('AuthService', () => {
-    it('should use default values when called with no arguments', () => {
-      const svc = new AuthService()
-      expect(svc.body).toEqual({})
-      expect(svc.query).toEqual({})
-      expect(svc.params).toEqual({})
-      expect(svc.user).toEqual({})
-      expect(svc.files).toEqual([])
-    })
   })
 
   describe('POST /api/auth/register', () => {
@@ -68,7 +57,7 @@ describe('Auth API', () => {
       const res = await request(app).post('/api/auth/register').send(body)
 
       expect(res.status).toBe(400)
-      expect(res.body.error).toContain('Username or Email already exists')
+      expect(res.body.error.message).toContain('Username or Email already exists')
     })
 
     it('should return 400 with validation details on invalid email format', async () => {
@@ -104,7 +93,7 @@ describe('Auth API', () => {
       const res = await request(app).post('/api/auth/login').send(body)
 
       expect(res.status).toBe(400)
-      expect(res.body.error).toContain('Username or Email not found')
+      expect(res.body.error.message).toContain('Username or Email not found')
     })
 
     it('should return 400 when password is incorrect', async () => {
@@ -114,7 +103,7 @@ describe('Auth API', () => {
       const res = await request(app).post('/api/auth/login').send(body)
 
       expect(res.status).toBe(400)
-      expect(res.body.error).toContain('Password incorrect')
+      expect(res.body.error.message).toContain('Password incorrect')
     })
   })
 
@@ -231,7 +220,9 @@ describe('Auth API', () => {
     it('should return 500 when service.identify() throws', async () => {
       const user = await usersModel.create(makeUser())
       const token = makeToken({ id: user.id, version: user.version }, 'access')
-      jest.spyOn(AuthService.prototype, 'identify').mockRejectedValue(new Error('identify boom'))
+      jest.spyOn(authService, 'identify').mockImplementation(() => {
+        throw new Error('identify boom')
+      })
 
       const res = await request(app).get('/api/auth/identify').set('Authorization', `Bearer ${token}`)
 
@@ -241,7 +232,7 @@ describe('Auth API', () => {
     it('should return 500 when service.logout() throws', async () => {
       const user = await usersModel.create(makeUser())
       const token = makeToken({ id: user.id, version: user.version }, 'access')
-      jest.spyOn(AuthService.prototype, 'logout').mockRejectedValue(new Error('logout boom'))
+      jest.spyOn(authService, 'logout').mockRejectedValue(new Error('logout boom'))
 
       const res = await request(app).post('/api/auth/logout').set('Authorization', `Bearer ${token}`)
 
