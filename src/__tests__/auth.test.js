@@ -1,8 +1,8 @@
-const request = require('supertest')
 const bcrypt = require('bcryptjs')
-const { usersModel } = require('../model/relation')
-const { createApp, setupDB, teardownDB, resetDB } = require('../helper/testSetup')
+const request = require('supertest')
 const { makeRegisterBody, makeLoginBody, makeToken, makeUser } = require('../helper/testHelper')
+const { createApp, setupDB, teardownDB, resetDB } = require('../helper/testSetup')
+const { usersModel } = require('../model/relation')
 const AuthService = require('../service/authService')
 
 const app = createApp()

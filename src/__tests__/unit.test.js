@@ -1,9 +1,9 @@
+const request = require('supertest')
 const { NotFoundError, ForbiddenError, ConflictError, ServerError, BadGatewayError, GoneError, handleError } = require('../helper/customErrorHelper')
+const { response } = require('../helper/responseHelper')
+const { createApp } = require('../helper/testSetup')
 const { errorMiddleware } = require('../middleware/errorMiddleware')
 const BaseService = require('../service/baseService')
-const { response } = require('../helper/responseHelper')
-const request = require('supertest')
-const { createApp } = require('../helper/testSetup')
 
 describe('GET /api/ping', () => {
   it('should return Pong', async () => {

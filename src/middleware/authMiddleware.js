@@ -1,7 +1,7 @@
 const { v4: uuid } = require('uuid')
-const usersModel = require('../model/usersModel')
 const { AuthenticationError } = require('../helper/customErrorHelper')
 const { verifyToken } = require('../helper/jwtHelper')
+const usersModel = require('../model/usersModel')
 
 const authMiddleware = async (req, res, next) => {
   try {

@@ -1,9 +1,9 @@
-const express = require('express')
 const cors = require('cors')
+const express = require('express')
 const fileUpload = require('express-fileupload')
 const { pgsql } = require('../config/db')
-const router = require('../router')
 const { errorMiddleware } = require('../middleware/errorMiddleware')
+const router = require('../router')
 
 const createApp = () => {
   const app = express()

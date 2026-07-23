@@ -1,7 +1,7 @@
-const { response } = require('../helper/responseHelper')
 const logger = require('../helper/logger')
+const { response } = require('../helper/responseHelper')
 
-const errorMiddleware = async (error, req, res, next) => {
+const errorMiddleware = (error, req, res, next) => {
   if (!error) {
     return next()
   }
@@ -14,11 +14,11 @@ const errorMiddleware = async (error, req, res, next) => {
     ForbiddenError: 'Forbidden Error',
     ConflictError: 'Conflict Error',
     ServerError: 'Internal Server Error',
-    BadGatewayError: 'Bad Gateway'
+    BadGatewayError: 'Bad Gateway',
   }
 
   const httpMessage = errorMessages[error.name] || 'Internal Server Error'
-  const httpCode = (error.name === 'ServerError' || !errorMessages[error.name]) ? 500 : error.code
+  const httpCode = error.name === 'ServerError' || !errorMessages[error.name] ? 500 : error.code
   const errorDetails = { message: error.message, trace_id: req.id }
 
   return response(res, httpCode, httpMessage, null, {}, errorDetails)

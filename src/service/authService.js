@@ -1,12 +1,11 @@
+const bcrypt = require('bcryptjs')
+const { Op } = require('sequelize')
+const BaseService = require('./baseService')
 const { ValidationError } = require('../helper/customErrorHelper')
+const { createToken, verifyToken } = require('../helper/jwtHelper')
 const { usersModel } = require('../model/relation')
 const { registerSchema, loginSchema, refreshSchema } = require('../validator/authValidator')
 const validate = require('../validator/validator')
-const BaseService = require('./baseService')
-const { Op } = require('sequelize')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
-const { createToken, verifyToken } = require('../helper/jwtHelper')
 
 class AuthService extends BaseService {
   constructor(body = {}, query = {}, params = {}, user = {}, files = []) {
@@ -32,7 +31,7 @@ class AuthService extends BaseService {
     }
 
     // Create User
-    const user = await usersModel.create({
+    await usersModel.create({
       name,
       username,
       email,
@@ -72,12 +71,12 @@ class AuthService extends BaseService {
     return { accessToken, refreshToken }
   }
 
-  async identify() {
+  identify() {
     delete this.user.version
     return this.user
   }
 
-  async refresh() {
+  refresh() {
     // Validate Request
     validate(refreshSchema, this.body)
 

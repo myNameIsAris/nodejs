@@ -1,5 +1,6 @@
 const prettier = require('eslint-config-prettier')
 const importPlugin = require('eslint-plugin-import')
+const unusedImports = require('eslint-plugin-unused-imports')
 
 module.exports = [
   {
@@ -34,6 +35,7 @@ module.exports = [
     },
     plugins: {
       import: importPlugin,
+      'unused-imports': unusedImports,
     },
     rules: {
       ...prettier.rules,
@@ -52,8 +54,16 @@ module.exports = [
           },
         },
       ],
-      'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       'no-console': 'off',
+      // Unused imports handling
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      // Must-have built-in rules
+      'eqeqeq': ['error', 'always'],
+      'no-var': 'error',
+      'prefer-const': 'error',
+      'require-await': 'error',
+      'no-throw-literal': 'error',
     },
   },
 ]

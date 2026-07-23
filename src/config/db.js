@@ -25,7 +25,7 @@ const pgsql = isTest
 if (!isTest) {
   pgsql
     .authenticate()
-    .then(async () => {
+    .then(() => {
       console.info(`Successfully connect to database ${DB.HOST}:${DB.NAME}`)
     })
     .catch((err) => {
